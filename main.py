@@ -9,3 +9,13 @@
 # 8: Allow users to set a budget for each month and show a warning when the user exceeds the budget.
 # 9: Allow users to export expenses to a CSV file.
 
+class ExpenseTracker:
+    def __init__(self, expense, amount):
+        self.expense = [dict(expense=expense, amount=amount), ]
+
+    def get_expense(self):
+        return self.expense
+
+    def add_expense(self, expense, amount):
+        self.expense.append(dict(expense=expense, amount=amount))
+
