@@ -1,115 +1,90 @@
-# Task
-# 1: Users can add an expense with a description and amount. ok
-# 2: Users can update an expense. ok
-# 3: Users can delete an expense.ok
-# 4: Users can view all expenses. ok
-# 5: Users can view a summary of all expenses. ok
-# 6: Users can view a summary of expenses for a specific month (of current year). ok
-# 7 : Add expense categories and allow users to filter expenses by category. ok
-# 8: Allow users to set a budget for each month and show a warning when the user exceeds the budget.
-# 9: Allow users to export expenses to a CSV file.
+import argparse
 from datetime import datetime
+from ExpenseTracker import ExpenseTracker
 
-class ExpenseTracker:
+def main():
+    """Main function"""
+    parser = argparse.ArgumentParser(
+        description="Simple Expense Tracker"
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Avaliable Commands")
 
-    def __init__(self, name):
-        self.name = name
-        self.expenses = []
-        self.next_id = 1
+    # -----------------
+    # Add
+    add_parser = subparsers.add_parser("add", help="Add an expense")
+    add_parser.add_argument("--description", required=True, help="Description of the expense")
+    add_parser.add_argument("--amount", required=True, help="Amount of the expense")
+    add_parser.add_argument("--category", type=str, help="category of the expense")
+    # -----------------
+    # Update
+    update_parser = subparsers.add_parser("update", help="Update an expense")
+    update_parser.add_argument("--id", required=True, type=int, help="ID of the expense")
+    update_parser.add_argument("--description", help="Description of the expense")
+    update_parser.add_argument("--amount", help="Amount of the expense")
+    update_parser.add_argument("--category", help="Category of the expense")
 
-    def get_expenses(self):
-        """return expenses"""
-        return self.expenses
+    # -----------------
+    # list
+    list_parser = subparsers.add_parser("list", help="List all expenses")
+    list_parser.add_argument("--month", type=int, help="List filtered by month")
+    list_parser.add_argument("--year", type=int, help="List filtered by year")
+    list_parser.add_argument("--category", help="List filtered by category")
 
-    def add_expense(self, description, amount, category="Others"):
-        """Add an expense to the expenses list"""
-        expense_id = self.next_id
-        self.next_id += 1
-        date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        self.expenses.append(dict(id=expense_id, description=description, amount=amount, date=date, category=category))
+    # -----------------
+    # summary
+    summary_parser = subparsers.add_parser("summary", help="Show summary of an expense")
+    summary_parser.add_argument("--month", type=int, help="Filter by month number (1-12)")
 
-    def update_expense(self, id_expense, description=None, amount=None, category=None):
-        """Update an expense"""
-        for expense in self.expenses:
-            if expense['id'] == id_expense:
-                if description is not None:
-                    expense['description'] = description
-                if amount is not None:
-                    expense['amount'] = amount
-                if category is not None:
-                    expense['category'] = category
-                return print(f"Updated {expense['description']} to {amount} of category {category}")
-        return f"Expense {expense['id']} does not exist"
+    # -----------------
+    # delete
+    delete_parser = subparsers.add_parser("delete", help="Delete an expense")
+    delete_parser.add_argument("--id", type=int, help="ID of the expense")
 
-    def delete_expense(self, id_expense):
-        """Delete an expense"""
-        for expense in self.expenses:
-            if expense['id'] == id_expense:
-                self.expenses.remove(expense)
-                return print(f"Deleted '{expense['description']}' from id {id_expense} of {self.name}")
-        return f"Expense {id_expense} does not exist"
+    # -----------------
+    # set name
+    set_name_parser = subparsers.add_parser('name', help='Set the name of a expense')
+    set_name_parser.add_argument("--set", type=str, help="Name of the expense")
 
-    def summary(self):
-        """Print a summary of all expenses"""
-        summary = 0
-        for expense in self.expenses:
-            summary += expense['amount']
-        return print(f"Summary of {self.name} expenses: ${summary}")
+    # -----------------
+    # set budget
+    set_budget_parser = subparsers.add_parser('budget', help='Set the budget of an expense')
+    set_budget_parser.add_argument("--amount", type=float, help="Budget of the expense")
 
-    def show_expenses(self, expenses=None):
-        """List all expenses"""
-        data = expenses if expenses is not None else self.expenses
+    args = parser.parse_args()
+    tracker = ExpenseTracker()
 
-        if not data:
-            print(f"No expenses found")
-            return
-
-        print(f"{'ID':<5}{'Category':<15}{'Description':<20}{'Amount (U$)':<12}{'Data'}")
-        print("-"*80)
-
-        for expense in data:
-            print(f"{expense['id']:<5}{expense['category']:<15}{expense['description']:<20}{expense['amount']:<12.2f}{expense['date']}")
-
-    def show_expenses_by_month(self, month, year):
-        """List all expenses by month"""
-        expenses_filtered = []
-        for expense in self.expenses:
-            expense_date = datetime.strptime(expense['date'], '%Y-%m-%d %H:%M:%S')
-            if month == expense_date.month and year == expense_date.year:
-                expenses_filtered.append(expense)
-        if not expenses_filtered:
-            print(f"No expenses found for month {month} of {year}")
+    # Execution of commands
+    if args.command == "add":
+        tracker.add_expense(args.description, args.amount, args.category)
+    elif args.command == "delete":
+        tracker.delete_expense(args.id)
+    elif args.command == 'update':
+        tracker.update_expense(args.id, description=None or args.description, amount=None or args.amount, category=None or args.category)
+    elif args.command == "name":
+        tracker.set_name(args.name)
+    elif args.command == "budget":
+        if args.amount:
+            tracker.set_budget(args.amount)
         else:
-            print(f"Month {month} of {year} expenses: ")
-            self.show_expenses(expenses_filtered)
-
-    def show_expenses_by_category(self, category):
-        """List all expenses by category"""
-        expenses_filtered = []
-        for expense in self.expenses:
-            if expense['category'].lower() == category.lower():
-                expenses_filtered.append(expense)
-        if not expenses_filtered:
-            print(f"No expenses found for category {category}")
+            tracker.get_budget()
+    elif args.command == "list":
+        if args.category:
+            tracker.show_expenses_by_category(args.category)
+        elif args.month or args.year:
+            month = args.month if args.month else datetime.today().month
+            year = args.year if args.year else datetime.today().year
+            tracker.show_expenses_by_month(month, year)
         else:
-            print()
-            print(f"Category {category} expenses: ")
-            self.show_expenses(expenses_filtered)
+            tracker.show_expenses()
+    elif args.command == "summary":
+        if args.month:
+            tracker.show_summary_by_month(args.month)
+        else:
+            tracker.show_summary()
+
+if __name__ == "__main__":
+    main()
 
 
 
-
-joao = ExpenseTracker('joao')
-joao.add_expense(description='curso python', amount=100)
-joao.add_expense('livro', 155.15)
-joao.add_expense('cafe da manhã', 25.50, 'Alimentação')
-joao.add_expense('Curso de vendas', 1000)
-joao.add_expense('Tênis', 200, 'Vestimenta')
-joao.add_expense('Bolo de maracuja', 25, 'Alimentação')
-joao.add_expense('Cinema', 50, 'lazer')
-joao.update_expense(1, amount=50.55)
-joao.delete_expense(2)
-joao.show_expenses_by_month(9, 2025)
-joao.show_expenses()
-joao.show_expenses_by_category('alimentação')
 
