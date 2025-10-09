@@ -7,7 +7,8 @@ import calendar
 class ExpenseTracker:
 
     def __init__(self, name="MyExpenseTracker", filename=None):
-        self.filename = filename or f"{name}.csv"
+        self.filename = os.path.join(os.path.dirname(__file__), '..', f'{name}.csv')
+        self.filename = os.path.abspath(self.filename)
         self.config_file = os.path.join(os.path.dirname(__file__), '..', 'config.json')
         self.config_file = os.path.abspath(self.config_file)
         self.expenses = self.load_from_csv()
