@@ -10,7 +10,7 @@ A simple and practical expense tracker built with Python, featuring:
 
 ---
 # Example
-
+![Demo of Expense Tracker CLI](assets/demo.gif)
 
 #  Installation
 
