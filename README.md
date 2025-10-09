@@ -8,6 +8,8 @@ A simple and practical expense tracker built with Python, featuring:
 - Automatic storage in `.csv` files and configuration in `config.json`
 - Intuitive and easy-to-use CLI (Command Line Interface)
 
+It is inspired from the [Expense Tracker](https://roadmap.sh/projects/expense-tracker/solutions) project featured in the Backend Roadmap from roadmap.sh.
+
 ---
 # Example
 ![Demo of Expense Tracker CLI](assets/demo.gif)
