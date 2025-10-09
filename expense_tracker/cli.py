@@ -1,6 +1,6 @@
 import argparse
 from datetime import datetime
-from ExpenseTracker import ExpenseTracker
+from .ExpenseTracker import ExpenseTracker
 
 def main():
     """Main function"""
@@ -61,12 +61,12 @@ def main():
     elif args.command == 'update':
         tracker.update_expense(args.id, description=None or args.description, amount=None or args.amount, category=None or args.category)
     elif args.command == "name":
-        tracker.set_name(args.name)
+        tracker.set_name(args.set)
     elif args.command == "budget":
         if args.amount:
             tracker.set_budget(args.amount)
         else:
-            tracker.get_budget()
+            tracker.check_budget()
     elif args.command == "list":
         if args.category:
             tracker.show_expenses_by_category(args.category)

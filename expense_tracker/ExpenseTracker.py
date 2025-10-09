@@ -7,32 +7,34 @@ import calendar
 class ExpenseTracker:
 
     def __init__(self, name="MyExpenseTracker", filename=None):
-        self.name = name
         self.filename = filename or f"{name}.csv"
-        self.config_file = "config.json"
+        self.config_file = os.path.join(os.path.dirname(__file__), '..', 'config.json')
+        self.config_file = os.path.abspath(self.config_file)
         self.expenses = self.load_from_csv()
-        self.budget, self.next_id = self.load_config()
+        self.name, self.budget, self.next_id = self.load_config()
 
 
     def set_name(self, name):
         """Set the name of this ExpenseTracker"""
         self.name = name
+        self.save_config()
 
     def save_config(self):
-        """Save the budget and the next_id"""
-        data = {"budget": self.budget, "next_id": self.next_id}
+        """Save the name, budget and the next_id"""
+        data = {"name": self.name, "budget": self.budget, "next_id": self.next_id}
         with open(self.config_file, "w") as f:
             json.dump(data, f)
 
     def load_config(self):
-        """Load the budget and the next_id from the config file"""
+        """Load the name, budget and the next_id from the config file"""
         if os.path.exists(self.config_file):
             with open(self.config_file, "r") as f:
                 data = json.load(f)
+                name = data.get("name", 'MyExpenseTracker')
                 budget = data.get("budget", 0.0)
                 next_id = data.get("next_id", 1)
-                return budget, next_id
-        return 0.0, 1
+                return name, budget, next_id
+        return 'MyExpenseTracker', 0.0, 1
 
 
     def set_budget(self, amount):
@@ -127,7 +129,7 @@ class ExpenseTracker:
 
     def show_expenses(self, expenses=None):
         """List all expenses"""
-        data = self.load_from_csv()
+        data = expenses or self.expenses
 
         if len(data) == 0:
             print(f"No expenses found")
@@ -161,8 +163,7 @@ class ExpenseTracker:
         if not expenses_filtered:
             print(f"No expenses found for category {category}")
         else:
-            print()
-            print(f"Category {category} expenses: ")
+            print(f"Category {category}: ")
             self.show_expenses(expenses_filtered)
 
     def save_to_csv(self):
